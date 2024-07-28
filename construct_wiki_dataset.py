@@ -14,6 +14,7 @@ if USER_AGENT is None:
     raise ValueError(
         "The environment variable 'WIKI_USER_AGENT' is not set! See https://foundation.wikimedia.org/wiki/Policy:User-Agent_policy for guidelines on how to do so."
     )
+
 WIKI = wikipediaapi.Wikipedia(language=LANG, user_agent=USER_AGENT)
 
 
@@ -31,18 +32,12 @@ def get_disambiguation_pages():
     }
 
     # ns (namespace) 0 corresponds to main/article content: https://en.wikipedia.org/wiki/Wikipedia:Namespace
-    disambiguation_pages = [
-        title for title, page in all_disambiguation_links.items() if page.ns == 0
-    ]
-
-    return disambiguation_pages
+    return [title for title, page in all_disambiguation_links.items() if page.ns == 0]
 
 
 def count_links(disambiguation_page):
     page = WIKI.page(disambiguation_page)
-    if page.exists():
-        return len(page.links)
-    return 0
+    return len(page.links) if page.exists() else 0
 
 
 if __name__ == "__main__":
@@ -60,20 +55,14 @@ if __name__ == "__main__":
     print("[+] Getting all the disambiguation pages...")
     disambiguation_pages = get_disambiguation_pages()
 
-    # ignore all the pages already stored
-    pages_to_process = [
-        page_title
-        for page_title in disambiguation_pages
-        if page_title not in highly_ambiguous_entities
-    ]
     threshold = 10
     print(f"[+] Filtering for the ones with at least {threshold} disambiguations...")
-    for page_title in pages_to_process:
-        link_count = count_links(page_title)
-        if link_count > threshold:
-            highly_ambiguous_entities[page_title] = link_count
-            save_checkpoint(json_file, highly_ambiguous_entities)
+    for page_title in disambiguation_pages:
+        if page_title not in highly_ambiguous_entities:
+            link_count = count_links(page_title)
+            if link_count > threshold:
+                highly_ambiguous_entities[page_title] = link_count
+                save_checkpoint(json_file, highly_ambiguous_entities)
+            time.sleep(rate_limit_interval)
 
-        time.sleep(rate_limit_interval)
-
-    print(f"[+] Processing complete! Results saved to {json_file}")
+    print(f"[+] Processing complete! Results saved to {json_file}.")
