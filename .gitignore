@@ -168,5 +168,4 @@ cython_debug/
 
 # Alia
 spielraum.ipynb
-# the weights alone are ~20GB, so it's not a good idea to lug it around
-meta-llama/
+.env
