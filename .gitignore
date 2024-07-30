@@ -169,3 +169,5 @@ cython_debug/
 # Alia
 spielraum.ipynb
 .env
+# ignore these to avoid carrying around too much data
+data/snippets
