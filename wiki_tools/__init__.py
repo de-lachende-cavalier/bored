@@ -1,5 +1,5 @@
-from .config import WIKI, wiki_rate_limiter
+from .config import WIKI
 
-from .process_entities import *
+from .data_processing import *
 from .utils import *
 from .snippets import *
