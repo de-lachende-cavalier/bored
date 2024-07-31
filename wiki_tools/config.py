@@ -31,5 +31,4 @@ WIKI = wikipediaapi.Wikipedia(language=_LANG, user_agent=_USER_AGENT)
 
 
 # https://www.mediawiki.org/wiki/Wikimedia_REST_API#Terms_and_conditions
-# we'll use 100 reqs/s just to be on the safe side
-wiki_rate_limiter = RateLimiter(100)
+wiki_rate_limiter = RateLimiter(150)
