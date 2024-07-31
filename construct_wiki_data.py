@@ -28,6 +28,6 @@ print("[+] Gathering text snippets for each entity...")
 
 highly_ambiguous_entities = load_checkpoint(json_file)
 for disambiguation_page in highly_ambiguous_entities:
-    create_snippets(disambiguation_page, num_snippets_per_page=7)
+    get_snippets(disambiguation_page, num_snippets_per_page=5)
 
 print("[+] All done!")
