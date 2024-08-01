@@ -28,6 +28,12 @@ if _USER_AGENT is None:
     )
 
 WIKI = wikipediaapi.Wikipedia(language=_LANG, user_agent=_USER_AGENT)
+# in case one needs the page in HTML format (particularly useful if there are tables et alia)
+WIKI_HTML = wikipediaapi.Wikipedia(
+    language=_LANG,
+    user_agent=_USER_AGENT,
+    extract_format=wikipediaapi.ExtractFormat.HTML,
+)
 
 
 # https://www.mediawiki.org/wiki/Wikimedia_REST_API#Terms_and_conditions
