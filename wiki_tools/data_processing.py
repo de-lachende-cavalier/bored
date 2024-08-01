@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from .utils import count_links, save_checkpoint
 
 
@@ -19,3 +22,22 @@ def filter_out_pages(
             if has_alpha(page_title):
                 highly_ambiguous_entities[page_title] = link_count
                 save_checkpoint(checkpoint_file, highly_ambiguous_entities)
+
+
+def delete_non_ambiguous_entities():
+    path = "data/snippets"
+    for disambig in os.listdir(path):
+        disambig_path = os.path.join(path, disambig)
+
+        if not os.path.isdir(disambig_path):
+            continue
+
+        subdirs = [
+            d
+            for d in os.listdir(disambig_path)
+            if os.path.isdir(os.path.join(disambig_path, d))
+        ]
+
+        # we don't need to disambiguate a non-ambiguous entity, i.e., one for which there are less than 2 subdirs
+        if len(subdirs) < 2:
+            shutil.rmtree(disambig_path)

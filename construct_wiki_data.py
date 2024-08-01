@@ -21,7 +21,6 @@ if not all_ambiguous_in_checkpoint:
         disambiguation_page_titles, highly_ambiguous_entities, threshold, json_file
     )
     print(f"\t[+] Results saved to {json_file}.")
-
 print(f"[+] All the ambiguous entities are already in the checkpoint file.")
 
 print("[+] Gathering text snippets for each entity...")
@@ -29,5 +28,10 @@ print("[+] Gathering text snippets for each entity...")
 highly_ambiguous_entities = load_checkpoint(json_file)
 for disambiguation_page in highly_ambiguous_entities:
     get_snippets(disambiguation_page, num_snippets_per_page=5)
+
+print("[+] Deleting all the non-ambiguous entities after filtering...")
+
+# because of the previous filtering and the inconsistency in quality of various Wikipedia pages, we might be left with very few high-quality disambiguation possibilites => the below function ensures that we only keep those
+delete_non_ambiguous_entities()
 
 print("[+] All done!")
