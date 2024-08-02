@@ -169,5 +169,8 @@ cython_debug/
 # Alia
 spielraum.ipynb
 .env
-# ignore these to avoid carrying around too much data
-data/snippets
+
+# ignore to avoid carrying around too much data when cloning
+data/*
+# but keep the JSON file
+!data/highly_ambiguous_entities.json
