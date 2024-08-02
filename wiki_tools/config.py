@@ -37,4 +37,4 @@ WIKI_HTML = wikipediaapi.Wikipedia(
 
 
 # https://www.mediawiki.org/wiki/Wikimedia_REST_API#Terms_and_conditions
-wiki_rate_limiter = RateLimiter(150)
+wiki_rate_limiter = RateLimiter(200)
