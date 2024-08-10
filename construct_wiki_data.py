@@ -29,9 +29,9 @@ highly_ambiguous_entities = load_checkpoint(json_file)
 for disambiguation_page in highly_ambiguous_entities:
     get_snippets(disambiguation_page, num_snippets_per_page=5)
 
-print("[+] Deleting all the non-ambiguous entities after filtering...")
+print("[+] Cleaning up the data...")
 
-# because of the previous filtering and the inconsistency in quality of various Wikipedia pages, we might be left with very few high-quality disambiguation possibilites => the below function ensures that we only keep those
 delete_non_ambiguous_entities()
+delete_dirs_with_different_entities()
 
 print("[+] All done!")

@@ -25,6 +25,7 @@ def filter_out_pages(
 
 
 def delete_non_ambiguous_entities():
+    """We only want to keep the entities that are actually ambiguous (i.e., the ones for which we have at least two subdirs)."""
     path = "data/snippets"
     for disambig in os.listdir(path):
         disambig_path = os.path.join(path, disambig)
@@ -40,4 +41,32 @@ def delete_non_ambiguous_entities():
 
         # we don't need to disambiguate a non-ambiguous entity, i.e., one for which there are less than 2 subdirs
         if len(subdirs) < 2:
+            shutil.rmtree(disambig_path)
+
+
+def delete_dirs_with_different_entities():
+    """This function removes the directories that do not have any mention of the disambiguation entity in their text.
+
+    This can happen because of the way pages were initially filtered and because following links doesn't guarantee that the title string will be in a certain page.
+    """
+    path = "data/snippets"
+    for disambig in os.listdir(path):
+        disambig_path = os.path.join(path, disambig)
+        if not os.path.isdir(disambig_path):
+            continue
+
+        subdirs_to_keep = []
+        for subdir in os.listdir(disambig_path):
+            subdir_path = os.path.join(disambig_path, subdir)
+            if not os.path.isdir(subdir_path):
+                continue
+
+            entity_name = disambig.split("(")[0].strip()
+            if entity_name in subdir:
+                subdirs_to_keep.append(subdir)
+            else:
+                shutil.rmtree(subdir_path)
+
+        # we might be left with only one subdir after the deletions
+        if len(subdirs_to_keep) < 2:
             shutil.rmtree(disambig_path)
