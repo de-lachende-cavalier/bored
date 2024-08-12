@@ -1,3 +1,8 @@
+from datasets import load_dataset
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 import os
 import shutil
 
@@ -70,3 +75,29 @@ def delete_dirs_with_different_entities():
         # we might be left with only one subdir after the deletions
         if len(subdirs_to_keep) < 2:
             shutil.rmtree(disambig_path)
+
+
+def process_pretrain_dataset(train_cut, dev_cut, test_cut, cleanup_cache=True):
+    # https://huggingface.co/datasets/lucadiliello/wikipedia_512_pretraining
+    dataset_name = "lucadiliello/wikipedia_512_pretraining"
+    splits = ["train", "dev", "test"]
+    dataset = load_dataset(dataset_name)
+
+    all_data = []
+
+    for split, cut_percentage in zip(splits, [train_cut, dev_cut, test_cut]):
+        # the cuts should be in the (0, 1] range
+        samples_to_keep = int(len(dataset[split]) * cut_percentage)
+        resized_split = dataset[split].shuffle(seed=42).select(range(samples_to_keep))
+        df = resized_split.to_pandas()
+        all_data.append(df)
+    # we do not care which split the data comes from
+    combined_df = pd.concat(all_data, ignore_index=True)
+
+    output_file = "data/pretrain/combined.parquet"
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    pq.write_table(pa.Table.from_pandas(combined_df), output_file)
+
+    if cleanup_cache:
+        # to avoid needlessly occupy space on disk
+        dataset.cleanup_cache_files()

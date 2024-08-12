@@ -3,6 +3,9 @@ from wiki_tools import *
 print("[+] Gathering highly ambiguous entities...")
 
 json_file = "data/highly_ambiguous_entities.json"
+snippets_dir = "data/snippets"
+pretrain_dir = "data/pretrain"
+
 highly_ambiguous_entities = load_checkpoint(json_file)
 if highly_ambiguous_entities:
     print(f"\t[+] Resuming from checkpoint file {json_file}...")
@@ -33,5 +36,13 @@ print("[+] Cleaning up the data...")
 
 delete_non_ambiguous_entities()
 delete_dirs_with_different_entities()
+
+print(f"\t[+] Results saved to {snippets_dir}.")
+
+print("[+] Preparing pre-training data...")
+# we use a low training cut (0.2) because the dataset is quite large (it has ~7M training samples)
+process_pretrain_dataset(0.2, 0.9, 0.9)
+
+print(f"\t[+] Results saved to {pretrain_dir}.")
 
 print("[+] All done!")
