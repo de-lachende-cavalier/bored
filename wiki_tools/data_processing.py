@@ -100,7 +100,7 @@ def get_pretrain_dataset(cut):
 
             clean_summaries = _preprocess_pretrain(lines)
 
-            df = pd.DataFrame(clean_summaries, columns=["summary"])
+            df = pd.DataFrame(clean_summaries, columns=["text"])
             # shuffle the data before saving
             df = df.sample(frac=cut).reset_index(drop=True)
             df.to_parquet("data/pretrain.parquet")
@@ -111,8 +111,8 @@ def _preprocess_pretrain(lines):
     for line in lines:
         parts = line.split("|||")
         summary = parts[1].strip()
-        if summary.endswith("may refer to:"):
-            # some summaries are actually from disambiguation pages => we throw them away
+        if "may refer to:" in summary:
+            # some summaries are from disambiguation pages => we throw them away
             continue
         summaries.append(summary)
 
