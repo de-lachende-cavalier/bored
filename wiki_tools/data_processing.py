@@ -1,10 +1,11 @@
-from datasets import load_dataset
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-
 import os
 import shutil
+
+import pandas as pd
+
+import requests
+import tarfile
+import io
 
 from .utils import count_links, save_checkpoint
 
@@ -77,27 +78,42 @@ def delete_dirs_with_different_entities():
             shutil.rmtree(disambig_path)
 
 
-def process_pretrain_dataset(train_cut, dev_cut, test_cut, cleanup_cache=True):
-    # https://huggingface.co/datasets/lucadiliello/wikipedia_512_pretraining
-    dataset_name = "lucadiliello/wikipedia_512_pretraining"
-    splits = ["train", "dev", "test"]
-    dataset = load_dataset(dataset_name)
+def get_pretrain_dataset(cut):
+    # https://huggingface.co/datasets/jordiclive/wikipedia-summary-dataset
+    data_url = (
+        "https://thijsai.ams3.digitaloceanspaces.com/wiki-summary-dataset/raw.tar.gz"
+    )
 
-    all_data = []
+    response = requests.get(data_url)
+    if response.status_code != 200:
+        print(f"Failed to download the file. Status code: {response.status_code}")
 
-    for split, cut_percentage in zip(splits, [train_cut, dev_cut, test_cut]):
-        # the cuts should be in the (0, 1] range
-        samples_to_keep = int(len(dataset[split]) * cut_percentage)
-        resized_split = dataset[split].shuffle(seed=42).select(range(samples_to_keep))
-        df = resized_split.to_pandas()
-        all_data.append(df)
-    # we do not care which split the data comes from
-    combined_df = pd.concat(all_data, ignore_index=True)
+    fbytes = io.BytesIO(response.content)
+    with tarfile.open(fileobj=fbytes, mode="r:gz") as tar:
+        # there's only one file in the archive (raw.txt)
+        file_name = tar.getnames()[0]
+        extracted_file = tar.extractfile(file_name)
+        if extracted_file:
+            content = extracted_file.read().decode("utf-8")
+            # the last line is empty
+            lines = content.split("\n")[:-1]
 
-    output_file = "data/pretrain/combined.parquet"
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    pq.write_table(pa.Table.from_pandas(combined_df), output_file)
+            clean_summaries = _preprocess_pretrain(lines)
 
-    if cleanup_cache:
-        # to avoid needlessly occupy space on disk
-        dataset.cleanup_cache_files()
+            df = pd.DataFrame(clean_summaries, columns=["summary"])
+            # shuffle the data before saving
+            df = df.sample(frac=cut).reset_index(drop=True)
+            df.to_parquet("data/pretrain.parquet")
+
+
+def _preprocess_pretrain(lines):
+    summaries = []
+    for line in lines:
+        parts = line.split("|||")
+        summary = parts[1].strip()
+        if summary.endswith("may refer to:"):
+            # some summaries are actually from disambiguation pages => we throw them away
+            continue
+        summaries.append(summary)
+
+    return summaries
