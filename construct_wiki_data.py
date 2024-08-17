@@ -38,9 +38,9 @@ delete_dirs_with_different_entities()
 
 print(f"\t[+] Results saved to {snippets_dir}.")
 
-print("[+] Preparing pre-training data...")
+print("[+] Fetching pre-training data...")
 # the dataset has ~5M articles
-get_pretrain_dataset(0.15)
+get_pretrain_dataset(0.07)
 
 print(f"\t[+] Results saved to data/pretrain.parquet.")
 
