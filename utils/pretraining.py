@@ -7,7 +7,7 @@ import os
 
 def prepare_data(df, batch_size=1000, num_processes=None):
     if os.path.isfile("data/prepared.parquet"):
-        print("[+] Loading data from prepared.parque...")
+        print("[+] Loading data from prepared.parquet.")
         return pd.read_parquet("data/prepared.parquet")
 
     # the best model for NER is trf (https://spacy.io/models/en), but it's too slow without a GPU
