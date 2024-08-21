@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 
 import pandas as pd
 
@@ -104,6 +105,35 @@ def get_pretrain_dataset(cut):
             # shuffle the data before saving
             df = df.sample(frac=cut).reset_index(drop=True)
             df.to_parquet("data/pretrain.parquet")
+
+
+def get_dataframe_from_snippets():
+    """Generates properly formatted DataFrames from the collected snippets of text.
+
+    Our current data pipelien relies on text being fed in to the model in a DataFrame format with an id (automatically added by pandas) and a 'text' column. This function turns the Wikipedia snippets into this more ameanable format.
+
+    It returns a dictionary, maintaining the directory hierarchy, for ease of perusal and manipulation.
+    """
+    root = Path("data/snippets")
+    result = {}
+
+    for ent_path in root.iterdir():
+        if ent_path.is_dir():
+            ent = ent_path.name.split("_")[0].strip()
+            result[ent] = {}
+            for disambig_path in ent_path.iterdir():
+                if disambig_path.is_dir():
+                    disambig = disambig_path.name
+
+                    texts = [
+                        file.read_text(encoding="utf-8").strip()
+                        for file in disambig_path.glob("*.txt")
+                    ]
+
+                    if texts:
+                        result[ent][disambig] = pd.DataFrame({"text": texts})
+
+    return result
 
 
 def _preprocess_pretrain(lines):
