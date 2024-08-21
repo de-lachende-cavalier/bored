@@ -1,6 +1,9 @@
 import re
 import os
 import random
+from pathlib import Path
+
+import pandas as pd
 
 from nltk import sent_tokenize
 from difflib import SequenceMatcher
@@ -144,3 +147,32 @@ def get_snippets(
             continue
         for count, snippet in enumerate(previous_snips):
             save_snippet(disambiguation_page, page_title, snippet, count)
+
+
+def get_dataframes_from_snippets():
+    """Generates properly formatted DataFrames from the collected snippets of text.
+
+    Our current data pipelien relies on text being fed in to the model in a DataFrame format with an id (automatically added by pandas) and a 'text' column. This function turns the Wikipedia snippets into this more ameanable format.
+
+    It returns a dictionary, maintaining the directory hierarchy, for ease of perusal and manipulation.
+    """
+    root = Path("data/snippets")
+    result = {}
+
+    for ent_path in root.iterdir():
+        if ent_path.is_dir():
+            ent = ent_path.name.split("_")[0].strip()
+            result[ent] = {}
+            for disambig_path in ent_path.iterdir():
+                if disambig_path.is_dir():
+                    disambig = disambig_path.name
+
+                    texts = [
+                        file.read_text(encoding="utf-8").strip()
+                        for file in disambig_path.glob("*.txt")
+                    ]
+
+                    if texts:
+                        result[ent][disambig] = pd.DataFrame({"text": texts})
+
+    return result
