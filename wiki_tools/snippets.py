@@ -147,13 +147,9 @@ def get_snippets(
             save_snippet(disambiguation_page, page_title, snippet, count)
 
 
-def get_dataframes_from_snippets():
-    """Generates properly formatted DataFrames from the collected snippets of text.
+def get_data_from_snippets():
+    """Returns the textual data from the snippets in a hierarchical dictionary for easy access."""
 
-    Our current data pipelien relies on text being fed in to the model in a DataFrame format with an id (automatically added by pandas) and a 'text' column. This function turns the Wikipedia snippets into this more ameanable format.
-
-    It returns a dictionary, maintaining the directory hierarchy, for ease of perusal and manipulation.
-    """
     root = Path("data/snippets")
     result = {}
 
@@ -163,7 +159,7 @@ def get_dataframes_from_snippets():
             result[ent] = {}
             for disambig_path in ent_path.iterdir():
                 if disambig_path.is_dir():
-                    disambig = disambig_path.name
+                    disambig = "_".join(disambig_path.name.split("_")[1:]).strip()
 
                     result[ent][disambig] = [
                         file.read_text(encoding="utf-8").strip()
