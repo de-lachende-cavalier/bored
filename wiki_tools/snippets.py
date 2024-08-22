@@ -3,8 +3,6 @@ import os
 import random
 from pathlib import Path
 
-import pandas as pd
-
 from nltk import sent_tokenize
 from difflib import SequenceMatcher
 
@@ -167,12 +165,8 @@ def get_dataframes_from_snippets():
                 if disambig_path.is_dir():
                     disambig = disambig_path.name
 
-                    texts = [
+                    result[ent][disambig] = [
                         file.read_text(encoding="utf-8").strip()
                         for file in disambig_path.glob("*.txt")
                     ]
-
-                    if texts:
-                        result[ent][disambig] = pd.DataFrame({"text": texts})
-
     return result
