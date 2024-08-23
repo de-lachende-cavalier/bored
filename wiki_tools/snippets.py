@@ -154,15 +154,14 @@ def get_data_from_snippets():
     result = {}
 
     for ent_path in root.iterdir():
-        if ent_path.is_dir():
-            ent = ent_path.name.split("_")[0].strip()
-            result[ent] = {}
-            for disambig_path in ent_path.iterdir():
-                if disambig_path.is_dir():
-                    disambig = "_".join(disambig_path.name.split("_")[1:]).strip()
+        ent = ent_path.name.split("_")[0].strip()
+        result[ent] = {}
+        for disambig_path in ent_path.iterdir():
+            match = re.search(r"\((.*?)\)", disambig_path.name)
+            disambig = match.group(1) if match else disambig_path.name
 
-                    result[ent][disambig] = [
-                        file.read_text(encoding="utf-8").strip()
-                        for file in disambig_path.glob("*.txt")
-                    ]
+            result[ent][disambig] = [
+                file.read_text(encoding="utf-8").strip()
+                for file in disambig_path.glob("*.txt")
+            ]
     return result
