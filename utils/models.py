@@ -54,10 +54,12 @@ def get_mlp_data(X, y, born_clf, features, mappings):
         )
         most_likely_y = x_explanation.sum().idxmax()
 
-        num_ner_tag = list(mappings["ner_tag"]).index(most_likely_y)
         mlp_features = x_explanation[most_likely_y].to_list()
+        num_ner_tag = list(mappings["ner_tag"]).index(most_likely_y)
         mlp_features.append(num_ner_tag)
 
         mlp_X.append(mlp_features)
-        mlp_y.append(y[i])
-        return torch.tensor(mlp_X), torch.tensor(mlp_y)
+        # HACK: this adjustment makes the function work with single data points
+        mlp_y.append(y[i] if isinstance(y, list) else y)
+
+    return torch.tensor(mlp_X), torch.tensor(mlp_y)
