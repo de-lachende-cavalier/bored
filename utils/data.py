@@ -68,7 +68,7 @@ def encode_categorical(prepared_df, cols_to_encode):
         encoded_df[col_name] = encoded_col.flatten()
 
         # keep track of the mappigs for later (note that the encoding proceeds in the order in which the features appear in the list => the first element is encoded as 0, the second as 1, etc.)
-        mappings[col_name] = ordinal_encoder.categories_[0]
+        mappings[col_name] = ordinal_encoder.categories_[0].tolist()
 
     return encoded_df, mappings
 
