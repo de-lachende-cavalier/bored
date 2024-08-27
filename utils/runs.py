@@ -37,13 +37,16 @@ def get_latest_vectoriser():
     return load(vec_files[latest_vec])
 
 
-def get_latest_encmaps():
+def get_latest_encmap():
     path = Path(RUNS_DIR)
     dt_format = "%d%m%Y-%H%M%S"
 
-    vec_files = [str(file) for file in path.glob(f"encmap_*")]
-    latest_vec = np.argmax(
-        [datetime.strptime(f.split("_")[-1], dt_format) for f in vec_files]
+    enc_files = [str(file) for file in path.glob(f"encmap_*")]
+    latest_enc = np.argmax(
+        [datetime.strptime(f.split("_")[-1], dt_format) for f in enc_files]
     )
 
-    return json.load(vec_files[latest_vec])
+    encmap = {}
+    with open(enc_files[latest_enc], "r") as ef:
+        encmap = json.load(ef)
+    return encmap
