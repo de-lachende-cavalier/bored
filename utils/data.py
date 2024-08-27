@@ -73,6 +73,16 @@ def encode_categorical(prepared_df, cols_to_encode):
     return encoded_df, mappings
 
 
+def apply_categorical_mapping(prepared_df, enc_mappings):
+    encoded_df = prepared_df.copy()
+    for col, mapping in enc_mappings.items():
+        value_to_index = {value: index for index, value in enumerate(mapping)}
+        encoded_df[col] = prepared_df[col].map(value_to_index)
+        encoded_df[col] = encoded_df[col].fillna(len(mapping))
+        encoded_df[col] = encoded_df[col].astype(np.int8)
+    return encoded_df
+
+
 def construct_traintest_dataframe(nlp, target_entity, data_dict, train_size=50):
     n_disambigs_target = len(data_dict[target_entity])
     valid_ents = [
