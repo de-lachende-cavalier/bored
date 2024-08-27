@@ -1,14 +1,17 @@
 from joblib import load
 from pathlib import Path
 from datetime import datetime
+import json
 
 import numpy as np
 
 from typing import Literal
 
+RUNS_DIR = "runs/"
+
 
 def get_latest_model(model_type: Literal["clf", "mlp"] = "clf"):
-    path = Path("saved_models/")
+    path = Path(RUNS_DIR)
     dt_format = "%d%m%Y-%H%M%S"
 
     model_files = [str(file) for file in path.glob(f"{model_type}_*")]
@@ -23,7 +26,7 @@ def get_latest_vectoriser():
     # this is a separate function because
     # 1) the vectoriser is not dependent on model type
     # 2) we might need a vectorises without a model and vice versa
-    path = Path("saved_models/")
+    path = Path(RUNS_DIR)
     dt_format = "%d%m%Y-%H%M%S"
 
     vec_files = [str(file) for file in path.glob(f"vec_*")]
@@ -32,3 +35,15 @@ def get_latest_vectoriser():
     )
 
     return load(vec_files[latest_vec])
+
+
+def get_latest_encmaps():
+    path = Path(RUNS_DIR)
+    dt_format = "%d%m%Y-%H%M%S"
+
+    vec_files = [str(file) for file in path.glob(f"encmap_*")]
+    latest_vec = np.argmax(
+        [datetime.strptime(f.split("_")[-1], dt_format) for f in vec_files]
+    )
+
+    return json.load(vec_files[latest_vec])
