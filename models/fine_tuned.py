@@ -1,10 +1,15 @@
+import numpy as np
+
 from bornrule import BornClassifier
+from sklearn.utils.multiclass import unique_labels
 
 
 class FineTunedBornClassifier(BornClassifier):
     def __init__(
         self,
         pretrained_model: BornClassifier,
+        *,
+        n_classes: int,
         a: float = 0.5,
         b: float = 1.0,
         h: float = 1.0,
@@ -12,10 +17,15 @@ class FineTunedBornClassifier(BornClassifier):
     ):
         super().__init__(a=a, b=b, h=h)
         self.pretrained_model = pretrained_model
+        self.n_classes = n_classes
         self.learning_rate = learning_rate
 
     def partial_fit(self, X, y, classes=None, sample_weight=None):
         X, y = self._sanitize(X, y)
+
+        # due to little training data we might get inconsistent shapes if we didn't do the below
+        if len(self._unique_labels(y)) != self.n_classes:
+            classes = unique_labels(np.arange(0, self.n_classes))
 
         first_call = self._check_partial_fit_first_call(classes)
         if first_call:
