@@ -120,26 +120,25 @@ def construct_traintest_dataframe(nlp, target_entity, data_dict, train_size=50):
     return df
 
 
-def get_mlp_data(X, y, born_clf, features, mappings):
-    columns = mappings["ner_tag"]
+def get_mlp_data(X, y, born_clf, features, ner_tags):
+    num_samples = X.shape[0]
+    num_features = len(features) + 1  # +1 for the ner tag
 
-    mlp_X = []
-    mlp_y = []
+    X_mlp = np.zeros((num_samples, num_features), dtype=np.float32)
+    y_mlp = np.zeros(num_samples, dtype=np.int64)
     for i, x in enumerate(X):
-        x_explanation = pd.DataFrame(
-            born_clf.explain(x).toarray(), index=features, columns=columns
-        )
-        most_likely_y = x_explanation.sum().idxmax()
+        # (num_features, num_ner_tags)
+        x_explanation = born_clf.explain(x).toarray()
 
-        mlp_features = x_explanation[most_likely_y].to_list()
-        num_ner_tag = list(mappings["ner_tag"]).index(most_likely_y)
-        mlp_features.append(num_ner_tag)
+        most_likely_y = np.sum(x_explanation, axis=0).argmax()
+        # fill the ith row with the right features
+        X_mlp[i, :-1] = x_explanation[:, most_likely_y]
+        # add the ner_tag in the last column
+        X_mlp[i, -1] = ner_tags.index(ner_tags[most_likely_y])
 
-        mlp_X.append(mlp_features)
-        # HACK: this adjustment makes the function work with single data points
-        mlp_y.append(y[i] if isinstance(y, list) else y)
+        y_mlp[i] = y[i] if isinstance(y, list) else y
 
-    return torch.tensor(mlp_X), torch.tensor(mlp_y)
+    return torch.from_numpy(X_mlp), torch.from_numpy(y_mlp)
 
 
 def _process_text_snips(nlp, d, entity=None, disambig_key=None):
