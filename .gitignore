@@ -175,3 +175,6 @@ spielraum.ipynb
 data/*
 # but keep the JSON file
 !data/highly_ambiguous_entities.json
+
+# ignore the multilayer born model because it's too big
+runs/mlp*
