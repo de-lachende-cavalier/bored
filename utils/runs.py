@@ -1,6 +1,8 @@
-from joblib import load
 from pathlib import Path
 from datetime import datetime
+
+import joblib
+import torch
 import json
 
 import numpy as np
@@ -15,11 +17,13 @@ def get_latest_model(model_type: Literal["clf", "mlp"] = "clf"):
     dt_format = "%d%m%Y-%H%M%S"
 
     model_files = [str(file) for file in path.glob(f"{model_type}_*")]
-    latest_model = np.argmax(
+    latest_model_idx = np.argmax(
         [datetime.strptime(f.split("_")[-1], dt_format) for f in model_files]
     )
 
-    return load(model_files[latest_model])
+    if model_type == "clf":
+        return joblib.load(model_files[latest_model_idx])
+    return torch.load(model_files[latest_model_idx])
 
 
 def get_latest_vectoriser():
@@ -34,7 +38,7 @@ def get_latest_vectoriser():
         [datetime.strptime(f.split("_")[-1], dt_format) for f in vec_files]
     )
 
-    return load(vec_files[latest_vec])
+    return joblib.load(vec_files[latest_vec])
 
 
 def get_latest_encmap():
