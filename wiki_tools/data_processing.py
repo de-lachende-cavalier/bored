@@ -79,7 +79,6 @@ def delete_dirs_with_different_entities():
 
 
 def get_pretrain_dataset(cut):
-    # https://huggingface.co/datasets/jordiclive/wikipedia-summary-dataset
     data_url = (
         "https://thijsai.ams3.digitaloceanspaces.com/wiki-summary-dataset/raw.tar.gz"
     )
