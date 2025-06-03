@@ -24,7 +24,7 @@ The code uses `python 3.12.4`. To run it, do the following:
 ### Notebooks
 
 - `born_ensembles.ipynb` is a notebook I used to experiment with the possibility of constructing ensembles of Born Classifiers;
-- `born_layers.ipynb` contains experiments with Born Layers, in an attempt to construct a Born MLPA;
+- `born_layers.ipynb` contains experiments with Born Layers, in an attempt to construct a Born MLP;
 - `born_on_conll.ipynb` is a notebook that mostly served as a quick test to familiarise myself with the various pieces in play by using the Born Classifier for NER classification on the CoNLL dataset;
 - `entity_disambiguation.ipynb` is the "main" notebook, i.e., the one which contains the complete NED pipeline;
 - `pretraining_born.ipynb` is the notebook which contains the code used for pre-training a Born Classifier for NED.
